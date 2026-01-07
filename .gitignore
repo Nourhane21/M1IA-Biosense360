@@ -1,0 +1,26 @@
+# Modèles ML (trop volumineux pour GitHub)
+production/models/*.pkl
+production/models/*.joblib
+
+# Données brutes volumineuses
+Data/meteo_France_data/synop_2025.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.coverage
+*.egg-info/
+
+# Environnements
+.env
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db

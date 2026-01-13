@@ -42,30 +42,21 @@ Les mesures brutes fournies par les capteurs sont souvent difficiles à interpr�
 
 ---
 
-## 4) Données & indicateurs (exemples)
+## 4) Données & indicateurs
 
-### Capteurs (exemples)
+### Capteurs 
 - Température (°C)
 - Humidité relative (%)
 - Qualité de l’air (PM2.5 / CO₂ / TVOC selon capteurs)
 - Autres si disponibles : luminosité, vent, pression, etc.
 
-### Indices (exemples)
+### Indices 
 - Indices de confort thermique (ex. humidex / heat index selon choix projet)
 - Agrégations temporelles (moyenne glissante 10 min, max sur 1h, etc.)
 - Score de risque basé sur seuils (règles) ou modèle (ML)
 
 ---
 
-## 5) Installation & exécution (à compléter selon ton repo)
 
-### Pré-requis
-- Python 3.10+ (ou autre stack)
-- Docker (optionnel)
 
-### Installation
-```bash
-# exemple
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+

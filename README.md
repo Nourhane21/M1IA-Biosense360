@@ -28,7 +28,6 @@ Les mesures brutes fournies par les capteurs sont souvent difficiles à interpr�
   - statut global : `Favorable` / `À surveiller` / `Risque`
 - **Restitution** : dashboard, API, export (CSV/JSON), alertes (si activées)
 
-> Remarque : la liste exacte dépend des capteurs disponibles et du périmètre du client.
 
 ---
 

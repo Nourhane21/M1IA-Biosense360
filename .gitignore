@@ -2,8 +2,9 @@
 production/models/*.pkl
 production/models/*.joblib
 
-# Données brutes volumineuses
+# Données brutes volumineuses (> 50 MB)
 Data/meteo_France_data/synop_2025.csv
+Data/meteo_France_data/synop_2024.csv
 
 # Python cache
 __pycache__/

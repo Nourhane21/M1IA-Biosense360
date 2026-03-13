@@ -8,15 +8,12 @@
 
 ## Présentation
 
-Le notebook `BioSense360_Pipeline_IA_v3.ipynb` constitue le cœur scientifique du projet.
-Il implémente un pipeline de traitement et d'analyse des données environnementales
-(température, humidité) collectées par les capteurs Neusta ClimaTrack.
+Le notebook `BioSense360_Pipeline_IA_v3.ipynb` couvre l'intégralité du pipeline IA,
+de l'acquisition des données jusqu'à l'évaluation des modèles de prédiction du confort thermique.
 
 ---
 
 ## Partie 1 — Acquisition et Préparation des Données
-
-Chargement, nettoyage et standardisation des deux sources de données :
 
 | Cellule | Contenu |
 |---------|---------|
@@ -24,16 +21,34 @@ Chargement, nettoyage et standardisation des deux sources de données :
 | 1.2 | Sélection et standardisation des colonnes |
 | 1.3 | Nettoyage, contrôle qualité et filtrage |
 
-**Sources :**
-- `Data/meteo_France_data/` — relevés synoptiques Toulouse-Blagnac 2024–2025
-- `Data/Neusta/` — 487 fichiers JSON capteurs industriels (2024-09-20 → 2026-02-19)
+**Résultats :** 461 341 observations nettoyées, 487 fichiers Neusta chargés (2 formats).
+
+---
+
+## Partie 2 — Modélisation et Prédiction
+
+Entraînement et évaluation comparative de trois modèles de classification supervisée :
+
+| Cellule | Contenu |
+|---------|---------|
+| 2.1 | Calcul de l'indice Humidex et attribution des classes (0–7) |
+| 2.2 | Entraînement des modèles (Random Forest, Gradient Boosting, Régression Logistique) |
+| 2.3 | Évaluation : accuracy, matrice de confusion, rapport de classification |
+| 2.4 | Validation croisée 5-fold |
 
 **Résultats :**
-- 461 341 observations nettoyées (Météo France)
-- 487 fichiers Neusta chargés (2 formats détectés automatiquement)
-- Colonnes produites : `temperature` (°C), `humidite` (%), `humidex` (float), `classe` (int)
 
-> ⚠️ Les fichiers CSV bruts Météo France (`synop_2024.csv`, `synop_2025.csv`) ne sont pas versionnés en raison de leur taille (> 50 MB).
+| Modèle | Accuracy (test 20 %) |
+|--------|---------------------|
+| Random Forest (500 arbres, Entropie) | **99,98 %** |
+| Gradient Boosting | 99,74 % |
+| Régression Logistique | 97,22 % |
+
+Validation croisée 5-fold (Random Forest) : **99,96 % ± 0,04 %**
+
+Le modèle Random Forest est retenu. Le modèle sérialisé est disponible dans `production/models/`.
+
+> ⚠️ Le fichier modèle `modele_rf.pkl` n'est pas versionné (> 100 MB). À générer en exécutant le notebook.
 
 ---
 

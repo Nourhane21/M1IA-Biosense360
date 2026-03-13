@@ -1,0 +1,11 @@
+timestamp,temperature,humidite,humidex,classe,niveau,conseil
+2026-04-05T16:25:55.202465,23.3,63.0,27.74,1,Gêne légère,Hydratez-vous normalement lors d'efforts.
+2026-04-05T16:25:56.425865,21.2,59.0,23.88,0,Conditions Normales,Conditions idéales. Aucune restriction.
+2026-04-05T16:25:57.625723,25.5,56.0,30.08,2,Vigilance,Buvez régulièrement. Réduisez les efforts au soleil.
+2026-04-05T16:25:58.787616,27.2,51.0,31.84,2,Vigilance,Buvez régulièrement. Réduisez les efforts au soleil.
+2026-04-05T16:25:59.921199,27.1,60.0,33.47,2,Vigilance,Buvez régulièrement. Réduisez les efforts au soleil.
+2026-04-05T16:26:01.043069,15.4,59.0,15.57,0,Conditions Normales,Conditions idéales. Aucune restriction.
+2026-04-05T16:26:02.174404,18.3,62.0,19.98,0,Conditions Normales,Conditions idéales. Aucune restriction.
+2026-04-05T16:26:03.400702,17.7,59.0,18.77,0,Conditions Normales,Conditions idéales. Aucune restriction.
+2026-04-05T16:26:04.521109,18.3,57.0,19.4,0,Conditions Normales,Conditions idéales. Aucune restriction.
+2026-04-05T16:26:05.640038,19.4,57.0,20.97,0,Conditions Normales,Conditions idéales. Aucune restriction.

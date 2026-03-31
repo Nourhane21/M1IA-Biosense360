@@ -9,7 +9,8 @@
 ## Présentation
 
 Le notebook `BioSense360_Pipeline_IA_v3.ipynb` couvre l'intégralité du pipeline IA,
-de l'acquisition des données jusqu'à l'évaluation des modèles de prédiction du confort thermique.
+de l'acquisition des données jusqu'au système d'alerte thermique en temps réel.
+Le tableau de bord interactif est disponible dans `dashboard/`.
 
 ---
 
@@ -27,28 +28,39 @@ de l'acquisition des données jusqu'à l'évaluation des modèles de prédiction
 
 ## Partie 2 — Modélisation et Prédiction
 
-Entraînement et évaluation comparative de trois modèles de classification supervisée :
-
-| Cellule | Contenu |
-|---------|---------|
-| 2.1 | Calcul de l'indice Humidex et attribution des classes (0–7) |
-| 2.2 | Entraînement des modèles (Random Forest, Gradient Boosting, Régression Logistique) |
-| 2.3 | Évaluation : accuracy, matrice de confusion, rapport de classification |
-| 2.4 | Validation croisée 5-fold |
-
-**Résultats :**
-
 | Modèle | Accuracy (test 20 %) |
 |--------|---------------------|
 | Random Forest (500 arbres, Entropie) | **99,98 %** |
 | Gradient Boosting | 99,74 % |
 | Régression Logistique | 97,22 % |
 
-Validation croisée 5-fold (Random Forest) : **99,96 % ± 0,04 %**
+Validation croisée 5-fold : **99,96 % ± 0,04 %** — Modèle retenu : Random Forest.
 
-Le modèle Random Forest est retenu. Le modèle sérialisé est disponible dans `production/models/`.
+---
 
-> ⚠️ Le fichier modèle `modele_rf.pkl` n'est pas versionné (> 100 MB). À générer en exécutant le notebook.
+## Partie 3 — Détection des Dangers Thermiques
+
+Système d'alerte à 8 niveaux basé sur les seuils Humidex :
+
+| Classe | Seuil HX | Niveau |
+|--------|----------|--------|
+| 0 | < 25 | Conditions normales |
+| 1 | 25–30 | Gêne légère |
+| 2 | 30–34 | Vigilance |
+| 3 | 34–38 | Inconfort évident |
+| 4 | 38–40 | Alerte |
+| 5 | 40–43 | Inconfort intense |
+| 6 | 43–45 | Urgence vitale |
+| 7 | ≥ 45 | Danger extrême |
+
+**Validation Neusta (capteurs réels) : 99,05 % d'accuracy.**
+
+---
+
+## Tableau de Bord
+
+Le tableau de bord interactif (`dashboard/dashboard.html`) permet de visualiser
+les données journalières et les niveaux de confort thermique par source.
 
 ---
 
@@ -63,5 +75,3 @@ pip install pandas numpy scikit-learn matplotlib seaborn jupyter joblib
 ```bash
 jupyter notebook notebooks/BioSense360_Pipeline_IA_v3.ipynb
 ```
-
-Les cellules sont conçues pour être exécutées séquentiellement.

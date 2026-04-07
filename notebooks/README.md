@@ -8,9 +8,9 @@
 
 ## Présentation
 
-Le notebook `BioSense360_Pipeline_IA_v3.ipynb` couvre l'intégralité du pipeline IA,
-de l'acquisition des données jusqu'au système d'alerte thermique en temps réel.
-Le tableau de bord interactif est disponible dans `dashboard/`.
+Le notebook `BioSense360_Pipeline_IA_v3.ipynb` constitue le cœur scientifique du projet BioSense360.
+Il couvre l'intégralité du pipeline IA : acquisition des données, modélisation prédictive,
+détection des dangers thermiques et génération de recommandations de sécurité.
 
 ---
 
@@ -22,25 +22,27 @@ Le tableau de bord interactif est disponible dans `dashboard/`.
 | 1.2 | Sélection et standardisation des colonnes |
 | 1.3 | Nettoyage, contrôle qualité et filtrage |
 
-**Résultats :** 461 341 observations nettoyées, 487 fichiers Neusta chargés (2 formats).
+**Sources :**
+- `Data/meteo_France_data/` — relevés Toulouse-Blagnac 2024–2025 (461 341 obs.)
+- `Data/Neusta/` — 487 fichiers JSON capteurs (2024-09 → 2026-02)
+
+> ⚠️ Les fichiers bruts `synop_2024.csv` / `synop_2025.csv` ne sont pas versionnés (> 50 MB).
 
 ---
 
 ## Partie 2 — Modélisation et Prédiction
 
-| Modèle | Accuracy (test 20 %) |
-|--------|---------------------|
-| Random Forest (500 arbres, Entropie) | **99,98 %** |
-| Gradient Boosting | 99,74 % |
-| Régression Logistique | 97,22 % |
+| Modèle | Accuracy (test 20 %) | Validation croisée 5-fold |
+|--------|--------------------|--------------------------|
+| Random Forest (500 arbres, Entropie) | **99,98 %** | **99,96 % ± 0,04 %** |
+| Gradient Boosting | 99,74 % | — |
+| Régression Logistique | 97,22 % | — |
 
-Validation croisée 5-fold : **99,96 % ± 0,04 %** — Modèle retenu : Random Forest.
+> ⚠️ Le modèle `modele_rf.pkl` n'est pas versionné (> 100 MB). À générer via le notebook.
 
 ---
 
 ## Partie 3 — Détection des Dangers Thermiques
-
-Système d'alerte à 8 niveaux basé sur les seuils Humidex :
 
 | Classe | Seuil HX | Niveau |
 |--------|----------|--------|
@@ -53,14 +55,37 @@ Système d'alerte à 8 niveaux basé sur les seuils Humidex :
 | 6 | 43–45 | Urgence vitale |
 | 7 | ≥ 45 | Danger extrême |
 
-**Validation Neusta (capteurs réels) : 99,05 % d'accuracy.**
+**Validation sur capteurs réels Neusta : 99,05 % d'accuracy.**
 
 ---
 
-## Tableau de Bord
+## Partie 4 — Recommandations de Sécurité Thermique
 
-Le tableau de bord interactif (`dashboard/dashboard.html`) permet de visualiser
-les données journalières et les niveaux de confort thermique par source.
+Pipeline complet : capteur → prédiction IA → alerte → protocole de sécurité.
+Protocoles référencés : INRS, NIOSH, OHCOW, Décret 2025-482.
+
+---
+
+## Résultats clés
+
+| Indicateur | Valeur | Objectif |
+|------------|--------|----------|
+| Accuracy Random Forest (test) | **99,98 %** | ≥ 95 % ✅ |
+| Accuracy Gradient Boosting | **99,74 %** | ≥ 95 % ✅ |
+| Validation croisée 5-fold | **99,96 % ± 0,04 %** | ≥ 95 % ✅ |
+| Validation capteurs réels (Neusta) | **99,05 %** | ≥ 95 % ✅ |
+
+---
+
+## Structure du projet
+
+```
+BioSense360/
+├── Data/          — Données brutes (Météo France + Neusta)
+├── notebooks/     — Notebook d'analyse
+├── production/    — API REST et déploiement
+└── dashboard/     — Tableau de bord interactif
+```
 
 ---
 
@@ -75,3 +100,12 @@ pip install pandas numpy scikit-learn matplotlib seaborn jupyter joblib
 ```bash
 jupyter notebook notebooks/BioSense360_Pipeline_IA_v3.ipynb
 ```
+
+---
+
+## Références
+
+- Masterton & Richardson (1979). *Humidex.* Environment Canada.
+- Breiman (2001). *Random Forests.* Machine Learning, 45(1).
+- OHCOW (2022). *Heat Stress Humidex-Based Guideline.*
+- NIOSH (2016). *Occupational Exposure to Heat.*

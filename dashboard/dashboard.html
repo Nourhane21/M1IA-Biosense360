@@ -1212,13 +1212,149 @@ function getStationClass(stationId, refCls) {
 }
 
 let leafletMap = null;
+let mapMarkerLayers = [];
+
+// Inject map marker CSS once
+(function injectMapCSS() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .bs-marker {
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer; transition: transform .2s;
+    }
+    .bs-marker:hover { transform: scale(1.15) translateY(-4px); z-index: 1000 !important; }
+    .bs-pin {
+      width: 46px; height: 46px; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 3px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 16px rgba(0,0,0,.45), 0 0 0 0 currentColor;
+      position: relative; color: #0d1117;
+    }
+    .bs-pin.danger { animation: map-pulse 1.6s ease-in-out infinite; }
+    @keyframes map-pulse {
+      0%,100% { box-shadow: 0 4px 16px rgba(0,0,0,.45), 0 0 0 0 rgba(255,255,255,.5); }
+      50%      { box-shadow: 0 4px 20px rgba(0,0,0,.55), 0 0 0 8px rgba(255,255,255,.0); }
+    }
+    .bs-pin-cls  { font-size: 20px; font-weight: 900; line-height: 1; color: #fff; }
+    .bs-pin-icon { font-size: 9px; color: rgba(255,255,255,0.85); margin-top: 1px; }
+    .bs-stem {
+      width: 2px; height: 8px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 0 0 2px 2px;
+    }
+    .bs-label {
+      font-size: 10px; font-weight: 700; color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.7);
+      white-space: nowrap; margin-top: 3px; letter-spacing: .2px;
+    }
+    /* Leaflet tooltip override */
+    .leaflet-tooltip.bs-tip {
+      background: #0d1117; border: 1px solid #30363d;
+      border-radius: 10px; padding: 0; box-shadow: 0 8px 32px rgba(0,0,0,.7);
+      pointer-events: none; max-width: 230px;
+    }
+    .leaflet-tooltip.bs-tip::before { display: none; }
+    .bs-tip-inner { padding: 12px 14px; font-family: system-ui, sans-serif; }
+    .bs-tip-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .bs-tip-cls {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #fff; flex-shrink: 0;
+    }
+    .bs-tip-name  { font-size: 13px; font-weight: 700; color: #e6edf3; }
+    .bs-tip-region{ font-size: 10px; color: #8b949e; margin-top: 1px; }
+    .bs-tip-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px solid #21262d; font-size: 12px;
+    }
+    .bs-tip-row:last-child { border-bottom: none; }
+    .bs-tip-key { color: #8b949e; }
+    .bs-tip-val { font-weight: 700; color: #e6edf3; }
+    .bs-tip-conseil {
+      margin-top: 8px; padding: 8px 10px; border-radius: 6px;
+      font-size: 11px; line-height: 1.5; font-style: italic;
+    }
+    .bs-tip-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 700; color: #fff; margin-top: 6px;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// Estimated T/HR/HX by class (midpoint)
+const CLS_TYPICAL = {
+  0: { T: 18, HR: 60, HX: 16 },
+  1: { T: 24, HR: 58, HX: 27 },
+  2: { T: 29, HR: 63, HX: 32 },
+  3: { T: 34, HR: 68, HX: 36 },
+  4: { T: 38, HR: 72, HX: 39 },
+  5: { T: 41, HR: 76, HX: 42 },
+  6: { T: 44, HR: 80, HX: 44 },
+  7: { T: 47, HR: 85, HX: 48 },
+};
+// Regional T offset (relative to Toulouse)
+const REGIONAL_T_OFFSET = {
+  toulouse: 0, marseille: +2, nice: +2, montpellier: +1,
+  bordeaux: -1, lyon: -2, paris: -3, strasbourg: -4, nantes: -2, lille: -4,
+};
+
+function getStationData(st, refCls) {
+  const cls  = getStationClass(st.id, refCls);
+  const days = DATA ? DATA.meteo_days : null;
+  const isRef = st.id === "toulouse";
+
+  let T, HR, HX;
+  if (isRef && days && selectedDate && days[selectedDate]) {
+    const s = days[selectedDate].stats;
+    T = s.max_T; HR = s.avg_HR; HX = s.max_hx;
+  } else {
+    const typ = CLS_TYPICAL[cls];
+    const dt  = REGIONAL_T_OFFSET[st.id] || 0;
+    T  = Math.round((typ.T + dt) * 10) / 10;
+    HR = typ.HR;
+    HX = Math.round((typ.HX + dt * 0.7) * 10) / 10;
+  }
+  return { cls, T, HR, HX, isRef };
+}
+
+function makeTooltipHTML(st, d) {
+  const a = ALARME[d.cls];
+  const rows = [
+    { k: "Temp\u00e9rature",  v: d.T + " \u00b0C" },
+    { k: "Humidit\u00e9",     v: d.HR + " %" },
+    { k: "Humidex",           v: d.HX + " HX" },
+    { k: "Seuil classe",      v: a.seuil },
+  ];
+  const src = d.isRef
+    ? `<span class="bs-tip-badge" style="background:#58a6ff33;color:#58a6ff">\u2605 Donn\u00e9es r\u00e9elles</span>`
+    : `<span class="bs-tip-badge" style="background:#ffffff11;color:#8b949e">Estimation climatique</span>`;
+
+  return `<div class="bs-tip-inner">
+    <div class="bs-tip-header">
+      <div class="bs-tip-cls" style="background:${a.color}">${d.cls}</div>
+      <div>
+        <div class="bs-tip-name">${st.name}</div>
+        <div class="bs-tip-region">${st.region} &bull; D\u00e9p. ${st.dept}</div>
+      </div>
+    </div>
+    ${rows.map(r => `<div class="bs-tip-row">
+      <span class="bs-tip-key">${r.k}</span>
+      <span class="bs-tip-val">${r.v}</span>
+    </div>`).join("")}
+    <div class="bs-tip-conseil" style="background:${a.color}18;color:${a.color}">
+      ${a.conseil}
+    </div>
+    ${src}
+  </div>`;
+}
 
 function initMap() {
-  leafletMap = L.map("map-container").setView([46.5, 2.5], 6);
+  leafletMap = L.map("map-container", { zoomControl: true }).setView([46.6, 2.4], 6);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
-    maxZoom: 13
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> &copy; <a href='https://carto.com/'>CARTO</a>",
+    subdomains: "abcd", maxZoom: 14
   }).addTo(leafletMap);
 
   refreshMapMarkers();
@@ -1228,70 +1364,61 @@ function initMap() {
 function refreshMapMarkers() {
   if (!leafletMap) return;
 
-  // Get current day reference class from Toulouse data
   const days = DATA ? DATA.meteo_days : null;
   let refCls = 1;
-  if (days && selectedDate && days[selectedDate]) {
+  if (days && selectedDate && days[selectedDate])
     refCls = days[selectedDate].stats.max_cls;
-  } else if (days) {
+  else if (days) {
     const dates = Object.keys(days).sort();
     const latest = dates[dates.length - 1];
     if (latest && days[latest]) refCls = days[latest].stats.max_cls;
   }
 
-  // Remove existing markers
-  leafletMap.eachLayer(layer => {
-    if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
-      leafletMap.removeLayer(layer);
-    }
-  });
+  // Remove old markers
+  mapMarkerLayers.forEach(l => leafletMap.removeLayer(l));
+  mapMarkerLayers = [];
 
   STATIONS.forEach(st => {
-    const cls   = getStationClass(st.id, refCls);
-    const alarm = ALARME[cls];
-    const isRef = st.id === "toulouse";
+    const d = getStationData(st, refCls);
+    const a = ALARME[d.cls];
+    const isRef = d.isRef;
 
-    const circle = L.circleMarker([st.lat, st.lon], {
-      radius:      isRef ? 16 : 12,
-      fillColor:   alarm.color,
-      color:       isRef ? "#ffffff" : alarm.color,
-      weight:      isRef ? 3 : 1,
-      opacity:     1,
-      fillOpacity: isRef ? 0.95 : 0.75
-    }).addTo(leafletMap);
+    const pinClass = d.cls >= 4 ? " danger" : "";
+    const pinSize  = isRef ? 52 : 44;
 
-    const dataLine = isRef
-      ? (days && selectedDate && days[selectedDate]
-          ? `<br/><b>T max :</b> ${days[selectedDate].stats.max_T} &deg;C &nbsp; <b>HR :</b> ${days[selectedDate].stats.avg_HR} % &nbsp; <b>HX :</b> ${days[selectedDate].stats.max_hx}`
-          : "")
-      : "<br/><i style='font-size:10px;color:#aaa'>Estimation climatique relative</i>";
+    const icon = L.divIcon({
+      className: "",
+      iconAnchor: [pinSize / 2, pinSize + 18],
+      iconSize:   [pinSize, pinSize + 26],
+      html: `
+        <div class="bs-marker" style="width:${pinSize}px">
+          <div class="bs-pin${pinClass}" style="
+            width:${pinSize}px; height:${pinSize}px;
+            background:${a.color};
+            ${isRef ? "border-width:3px;border-color:#fff;" : "border-width:2px;border-color:rgba(255,255,255,0.7);"}
+            box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 18px ${a.color}55;
+          ">
+            <div class="bs-pin-cls">${d.cls}</div>
+            <div class="bs-pin-icon">${isRef ? "\u2605" : "\u25cf"}</div>
+          </div>
+          <div class="bs-stem"></div>
+          <div class="bs-label">${st.name.split("-")[0]}</div>
+        </div>`
+    });
 
-    circle.bindPopup(`
-      <div style="min-width:180px;font-family:system-ui;font-size:12px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${st.name}</div>
-        <div style="color:#666;margin-bottom:6px">${st.region} (${st.dept})</div>
-        <div style="background:${alarm.color}22;border-left:3px solid ${alarm.color};
-             padding:6px 8px;border-radius:4px">
-          <span style="font-size:20px;font-weight:900;color:${alarm.color}">${cls}</span>
-          &nbsp; <b>${alarm.niveau}</b><br/>
-          <span style="font-size:10px;color:#666">${alarm.seuil}</span>
-          ${dataLine}
-        </div>
-        ${isRef ? '<div style="margin-top:6px;font-size:10px;color:#58a6ff">&#9733; Station de reference (donnees reelles)</div>' : ""}
-      </div>
-    `);
+    const marker = L.marker([st.lat, st.lon], { icon, zIndexOffset: isRef ? 1000 : 0 });
 
-    // Label
-    L.marker([st.lat, st.lon], {
-      icon: L.divIcon({
-        className: "",
-        html: `<div style="font-size:10px;font-weight:700;color:#fff;
-                 text-shadow:0 0 3px #000;white-space:nowrap;
-                 transform:translate(-50%,16px)">${st.name.split("-")[0]}</div>`,
-        iconSize: [0, 0]
-      }),
-      interactive: false
-    }).addTo(leafletMap);
+    marker.bindTooltip(makeTooltipHTML(st, d), {
+      className: "bs-tip",
+      direction: "top",
+      offset: [0, -(pinSize + 20)],
+      opacity: 1,
+      permanent: false,
+      sticky: false
+    });
+
+    marker.addTo(leafletMap);
+    mapMarkerLayers.push(marker);
   });
 }
 
@@ -1299,8 +1426,9 @@ function buildMapLegend() {
   const el = document.getElementById("map-legend");
   el.innerHTML = Object.entries(ALARME).map(([cls, a]) =>
     `<div class="map-legend-item">
-       <div class="map-legend-dot" style="background:${a.color}"></div>
-       <span>Cls ${cls} &mdash; ${a.niveau}</span>
+       <div class="map-legend-dot" style="background:${a.color};border-radius:50%;width:12px;height:12px;border:1px solid rgba(255,255,255,0.3)"></div>
+       <span style="color:${a.color};font-weight:600">${cls}</span>
+       <span style="color:var(--muted)"> &mdash; ${a.niveau}</span>
      </div>`
   ).join("");
 }

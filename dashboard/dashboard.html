@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BioSense360 — Dashboard de Vivabilité Thermique</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="dashboard_data.js"></script>
   <style>
     /* ── Reset & Variables ─────────────────────────────────────── */
@@ -260,6 +262,143 @@
       flex-wrap: wrap;
     }
     footer strong { color: var(--text); }
+
+    /* ── Tab Navigation ───────────────────────────────────────── */
+    .tab-nav {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 28px; display: flex; gap: 4px;
+    }
+    .tab-btn {
+      padding: 10px 20px; border: none; background: transparent;
+      color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 500;
+      border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Carte & Deplacement page ─────────────────────────────── */
+    .carte-layout {
+      display: grid; grid-template-columns: 1fr 420px; gap: 0;
+      min-height: calc(100vh - 152px);
+    }
+    .map-section {
+      padding: 18px 22px; border-right: 1px solid var(--border);
+    }
+    #map-container {
+      height: calc(100vh - 260px); min-height: 400px;
+      border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .map-legend {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+    }
+    .map-legend-item {
+      display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted);
+    }
+    .map-legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── Recommendation Engine ────────────────────────────────── */
+    .rec-engine {
+      padding: 18px; overflow-y: auto;
+      max-height: calc(100vh - 152px);
+      background: var(--surface);
+    }
+    .zone-selectors {
+      display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px;
+      align-items: end; margin-bottom: 16px;
+    }
+    .zone-select label {
+      display: block; font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px;
+    }
+    .zone-select select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 12px;
+      cursor: pointer;
+    }
+    .zone-select select:focus { outline: none; border-color: var(--accent); }
+    .zone-arrow {
+      font-size: 20px; color: var(--muted); text-align: center;
+      padding-bottom: 8px;
+    }
+
+    /* Cross-matrix mini grid */
+    .cross-matrix-wrap {
+      margin-bottom: 14px;
+    }
+    .cross-matrix-grid {
+      display: grid; grid-template-columns: 20px repeat(8, 1fr);
+      gap: 2px; font-size: 9px;
+    }
+    .cm-cell {
+      aspect-ratio: 1; border-radius: 3px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 9px; color: #0d111788;
+      transition: transform .1s; border: 1px solid transparent;
+    }
+    .cm-cell:hover { transform: scale(1.3); z-index: 5; }
+    .cm-cell.cm-active { border-color: white; transform: scale(1.3); z-index: 5; }
+    .cm-label {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: var(--muted); font-weight: 700;
+    }
+    .cm-axis-label {
+      grid-column: 1 / -1; font-size: 9px; color: var(--muted);
+      text-align: center; padding: 2px 0;
+    }
+
+    /* Risk badge */
+    .risk-badge {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 8px; margin-bottom: 12px;
+      border: 1px solid; transition: all .3s;
+    }
+    .risk-icon { font-size: 28px; line-height: 1; }
+    .risk-level { font-size: 15px; font-weight: 700; }
+    .risk-sub { font-size: 11px; margin-top: 2px; }
+    .risk-delta { margin-left: auto; font-size: 28px; font-weight: 900; }
+
+    /* Accli timeline */
+    .accli-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
+    }
+    .accli-icon { font-size: 18px; }
+    .accli-text { font-size: 12px; }
+    .accli-time { font-size: 18px; font-weight: 700; color: var(--accent); margin-left: auto; }
+
+    /* Steps list for cross rec */
+    .cross-steps { list-style: none; margin-bottom: 10px; }
+    .cross-steps li {
+      display: flex; gap: 10px; padding: 7px 0;
+      border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.4;
+    }
+    .cross-steps li:last-child { border-bottom: none; }
+    .cross-step-phase {
+      font-size: 9px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px; margin-top: 1px;
+      flex-shrink: 0; width: 50px;
+    }
+    .cross-section-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .7px;
+      margin: 10px 0 6px; padding-bottom: 5px; border-bottom: 1px solid var(--border);
+    }
+    .transition-arrow {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+      padding: 10px 14px; background: var(--bg); border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .t-zone {
+      flex: 1; text-align: center; padding: 8px; border-radius: 6px;
+    }
+    .t-zone-label { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+    .t-zone-cls { font-size: 26px; font-weight: 900; line-height: 1; }
+    .t-zone-name { font-size: 10px; margin-top: 2px; }
+    .t-mid { font-size: 24px; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -278,6 +417,15 @@
     Précision test : <strong>99,98 %</strong> &nbsp;&bull;&nbsp; Validation Neusta : <strong>99,05 %</strong>
   </div>
 </header>
+
+<!-- ── Tab Navigation ──────────────────────────────────────────────────────── -->
+<div class="tab-nav">
+  <button class="tab-btn active" id="tab-analyse" onclick="switchTab('analyse')">Analyse journali&#232;re</button>
+  <button class="tab-btn" id="tab-carte" onclick="switchTab('carte')">Carte &amp; D&#233;placement</button>
+</div>
+
+<!-- ── Page Analyse ─────────────────────────────────────────────────────────── -->
+<div id="page-analyse">
 
 <!-- ── Source Toggle ──────────────────────────────────────────────────────── -->
 <div class="source-bar">
@@ -327,6 +475,56 @@
 
 <!-- Tooltip -->
 <div class="tooltip" id="tooltip"></div>
+
+</div><!-- end page-analyse -->
+
+<!-- ── Page Carte & Deplacement ─────────────────────────────────────────────── -->
+<div id="page-carte" style="display:none">
+  <div class="carte-layout">
+
+    <!-- Map -->
+    <div class="map-section">
+      <div class="panel-title">Carte thermique &mdash; Stations M&eacute;t&eacute;o France</div>
+      <div id="map-container"></div>
+      <div class="map-legend" id="map-legend"></div>
+    </div>
+
+    <!-- Recommendation Engine -->
+    <div class="rec-engine">
+      <div class="panel-title">Moteur de recommandation &mdash; D&eacute;placement thermique</div>
+
+      <div class="zone-selectors">
+        <div class="zone-select">
+          <label>Zone de d&eacute;part</label>
+          <select id="dep-class" onchange="computeCross()"></select>
+        </div>
+        <div class="zone-arrow">&#8594;</div>
+        <div class="zone-select">
+          <label>Zone d&apos;arriv&eacute;e</label>
+          <select id="arr-class" onchange="computeCross()"></select>
+        </div>
+      </div>
+
+      <!-- Mini matrix -->
+      <div class="cross-matrix-wrap">
+        <div class="panel-title">Matrice de risque (d&eacute;part &#215; arriv&eacute;e)</div>
+        <div id="cross-matrix"></div>
+        <div style="display:flex;gap:16px;margin-top:6px;font-size:10px;color:var(--muted)">
+          <span>&#8592; axe d&eacute;part (ligne)</span>
+          <span style="margin-left:auto">axe arriv&eacute;e (colonne) &#8594;</span>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div id="cross-output">
+        <div style="color:var(--muted);font-size:12px;text-align:center;padding:20px">
+          S&eacute;lectionnez une zone de d&eacute;part et d&apos;arriv&eacute;e
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- Footer -->
 <footer>
@@ -962,6 +1160,382 @@ function hideTooltip() {
 // Expose for onclick
 window.setSource   = setSource;
 window.jumpToClass = jumpToClass;
+window.switchTab   = switchTab;
+window.computeCross = computeCross;
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+let mapInitialized = false;
+
+function switchTab(tab) {
+  document.getElementById("page-analyse").style.display = tab === "analyse" ? "" : "none";
+  document.getElementById("page-carte").style.display   = tab === "carte"   ? "" : "none";
+  document.getElementById("tab-analyse").classList.toggle("active", tab === "analyse");
+  document.getElementById("tab-carte").classList.toggle("active",   tab === "carte");
+  if (tab === "carte" && !mapInitialized) {
+    initMap();
+    initCrossEngine();
+    mapInitialized = true;
+  }
+}
+
+// ── Leaflet Map ───────────────────────────────────────────────────────────────
+// Stations Meteo France avec coordonnees et donnees representatives
+const STATIONS = [
+  { id: "toulouse",  name: "Toulouse-Blagnac",  lat: 43.6219, lon: 1.3842,  dept: "31", region: "Occitanie" },
+  { id: "paris",     name: "Paris-CDG",          lat: 49.0097, lon: 2.5479,  dept: "95", region: "Ile-de-France" },
+  { id: "marseille", name: "Marseille-Marignane",lat: 43.4393, lon: 5.2214,  dept: "13", region: "PACA" },
+  { id: "lyon",      name: "Lyon-Bron",           lat: 45.7271, lon: 4.9422,  dept: "69", region: "Auvergne-Rhone-Alpes" },
+  { id: "bordeaux",  name: "Bordeaux-Merignac",   lat: 44.8283, lon: -0.7153, dept: "33", region: "Nouvelle-Aquitaine" },
+  { id: "nantes",    name: "Nantes-Atlantique",   lat: 47.1568, lon: -1.6062, dept: "44", region: "Pays de la Loire" },
+  { id: "strasbourg",name: "Strasbourg-Entzheim", lat: 48.5448, lon: 7.6283,  dept: "67", region: "Grand Est" },
+  { id: "lille",     name: "Lille-Lesquin",        lat: 50.5633, lon: 3.0897,  dept: "59", region: "Hauts-de-France" },
+  { id: "nice",      name: "Nice-Cote d'Azur",     lat: 43.6584, lon: 7.2089,  dept: "06", region: "PACA" },
+  { id: "montpellier",name:"Montpellier-Frejorgues",lat:43.5828,lon: 3.9630,  dept: "34", region: "Occitanie" },
+];
+
+// Classes representatifs par station (estimations basees sur climat)
+// Toulouse = donnees reelles, autres = estimations climatiques relatives
+function getStationClass(stationId, refCls) {
+  const offsets = {
+    toulouse:   0,
+    marseille:  +1,
+    nice:       +1,
+    montpellier:+1,
+    bordeaux:   0,
+    lyon:       -1,
+    paris:      -1,
+    strasbourg: -2,
+    nantes:     -1,
+    lille:      -2,
+  };
+  return Math.max(0, Math.min(7, refCls + (offsets[stationId] || 0)));
+}
+
+let leafletMap = null;
+
+function initMap() {
+  leafletMap = L.map("map-container").setView([46.5, 2.5], 6);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+    maxZoom: 13
+  }).addTo(leafletMap);
+
+  refreshMapMarkers();
+  buildMapLegend();
+}
+
+function refreshMapMarkers() {
+  if (!leafletMap) return;
+
+  // Get current day reference class from Toulouse data
+  const days = DATA ? DATA.meteo_days : null;
+  let refCls = 1;
+  if (days && selectedDate && days[selectedDate]) {
+    refCls = days[selectedDate].stats.max_cls;
+  } else if (days) {
+    const dates = Object.keys(days).sort();
+    const latest = dates[dates.length - 1];
+    if (latest && days[latest]) refCls = days[latest].stats.max_cls;
+  }
+
+  // Remove existing markers
+  leafletMap.eachLayer(layer => {
+    if (layer instanceof L.CircleMarker || layer instanceof L.Marker) {
+      leafletMap.removeLayer(layer);
+    }
+  });
+
+  STATIONS.forEach(st => {
+    const cls   = getStationClass(st.id, refCls);
+    const alarm = ALARME[cls];
+    const isRef = st.id === "toulouse";
+
+    const circle = L.circleMarker([st.lat, st.lon], {
+      radius:      isRef ? 16 : 12,
+      fillColor:   alarm.color,
+      color:       isRef ? "#ffffff" : alarm.color,
+      weight:      isRef ? 3 : 1,
+      opacity:     1,
+      fillOpacity: isRef ? 0.95 : 0.75
+    }).addTo(leafletMap);
+
+    const dataLine = isRef
+      ? (days && selectedDate && days[selectedDate]
+          ? `<br/><b>T max :</b> ${days[selectedDate].stats.max_T} &deg;C &nbsp; <b>HR :</b> ${days[selectedDate].stats.avg_HR} % &nbsp; <b>HX :</b> ${days[selectedDate].stats.max_hx}`
+          : "")
+      : "<br/><i style='font-size:10px;color:#aaa'>Estimation climatique relative</i>";
+
+    circle.bindPopup(`
+      <div style="min-width:180px;font-family:system-ui;font-size:12px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${st.name}</div>
+        <div style="color:#666;margin-bottom:6px">${st.region} (${st.dept})</div>
+        <div style="background:${alarm.color}22;border-left:3px solid ${alarm.color};
+             padding:6px 8px;border-radius:4px">
+          <span style="font-size:20px;font-weight:900;color:${alarm.color}">${cls}</span>
+          &nbsp; <b>${alarm.niveau}</b><br/>
+          <span style="font-size:10px;color:#666">${alarm.seuil}</span>
+          ${dataLine}
+        </div>
+        ${isRef ? '<div style="margin-top:6px;font-size:10px;color:#58a6ff">&#9733; Station de reference (donnees reelles)</div>' : ""}
+      </div>
+    `);
+
+    // Label
+    L.marker([st.lat, st.lon], {
+      icon: L.divIcon({
+        className: "",
+        html: `<div style="font-size:10px;font-weight:700;color:#fff;
+                 text-shadow:0 0 3px #000;white-space:nowrap;
+                 transform:translate(-50%,16px)">${st.name.split("-")[0]}</div>`,
+        iconSize: [0, 0]
+      }),
+      interactive: false
+    }).addTo(leafletMap);
+  });
+}
+
+function buildMapLegend() {
+  const el = document.getElementById("map-legend");
+  el.innerHTML = Object.entries(ALARME).map(([cls, a]) =>
+    `<div class="map-legend-item">
+       <div class="map-legend-dot" style="background:${a.color}"></div>
+       <span>Cls ${cls} &mdash; ${a.niveau}</span>
+     </div>`
+  ).join("");
+}
+
+// ── Cross-product Recommendation Engine ──────────────────────────────────────
+function initCrossEngine() {
+  const sel = (id) => document.getElementById(id);
+  [sel("dep-class"), sel("arr-class")].forEach(s => {
+    s.innerHTML = Object.entries(ALARME).map(([cls, a]) =>
+      `<option value="${cls}" style="color:${a.color}">
+         Classe ${cls} — ${a.niveau} (${a.seuil})
+       </option>`
+    ).join("");
+  });
+  sel("arr-class").value = "2";
+  buildCrossMatrix(0, 2);
+  computeCross();
+}
+
+// Risk level matrix: [dep][arr]
+function getRiskInfo(dep, arr) {
+  const delta = arr - dep;
+  if (delta === 0) {
+    return { level: "neutre", label: "Zone stable", color: ALARME[arr].color,
+             icon: "=", bg: ALARME[arr].color + "22", border: ALARME[arr].color + "55" };
+  }
+  if (delta < 0) {
+    const ab = Math.abs(delta);
+    if (ab >= 3) return { level: "choc-froid", label: "Choc thermique froid", color: "#60a5fa",
+                          icon: "\u2744", bg: "#60a5fa22", border: "#60a5fa55" };
+    return { level: "refroid", label: "Refroidissement", color: "#93c5fd",
+             icon: "\u2193", bg: "#93c5fd22", border: "#93c5fd55" };
+  }
+  // delta > 0
+  const maxCls = arr;
+  if (delta >= 4 || (maxCls >= 6 && dep <= 1))
+    return { level: "critique", label: "Transition critique", color: "#ef4444",
+             icon: "\u26a0", bg: "#ef444422", border: "#ef444455" };
+  if (delta >= 3 || maxCls >= 5)
+    return { level: "eleve", label: "Risque eleve", color: "#f97316",
+             icon: "\u25b2", bg: "#f9731622", border: "#f9731655" };
+  if (delta >= 2 || maxCls >= 3)
+    return { level: "modere", label: "Risque modere", color: "#facc15",
+             icon: "\u2191", bg: "#facc1522", border: "#facc1555" };
+  return { level: "faible", label: "Transition douce", color: "#a3e635",
+           icon: "\u2197", bg: "#a3e63522", border: "#a3e63555" };
+}
+
+// Acclimatization time by delta
+function getAccliTime(delta) {
+  if (delta <= 0) return null;
+  if (delta === 1) return { days: "3-5 jours", desc: "Acclimatation rapide" };
+  if (delta === 2) return { days: "7-10 jours", desc: "Acclimatation moderee" };
+  if (delta === 3) return { days: "10-14 jours", desc: "Acclimatation progressive requise" };
+  return { days: "14-21 jours", desc: "Acclimatation longue \u2014 exposition graduelle obligatoire" };
+}
+
+function buildCrossMatrix(selDep, selArr) {
+  const wrap = document.getElementById("cross-matrix");
+  let html = '<div class="cross-matrix-grid">';
+  // Header row: col labels
+  html += '<div class="cm-label"></div>';
+  for (let a = 0; a < 8; a++) {
+    html += `<div class="cm-label" style="color:${ALARME[a].color}">${a}</div>`;
+  }
+  // Rows
+  for (let d = 0; d < 8; d++) {
+    html += `<div class="cm-label" style="color:${ALARME[d].color}">${d}</div>`;
+    for (let a = 0; a < 8; a++) {
+      const ri  = getRiskInfo(d, a);
+      const sel = (d === selDep && a === selArr) ? " cm-active" : "";
+      html += `<div class="cm-cell${sel}"
+                    style="background:${ri.color}${a < d ? "44" : "cc"}"
+                    onclick="setCrossFromMatrix(${d},${a})"
+                    title="Depart ${d} \u2192 Arrivee ${a}: ${ri.label}">${ri.icon}</div>`;
+    }
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function setCrossFromMatrix(dep, arr) {
+  document.getElementById("dep-class").value = dep;
+  document.getElementById("arr-class").value = arr;
+  computeCross();
+}
+window.setCrossFromMatrix = setCrossFromMatrix;
+
+function computeCross() {
+  const dep = parseInt(document.getElementById("dep-class").value);
+  const arr = parseInt(document.getElementById("arr-class").value);
+  const ri  = getRiskInfo(dep, arr);
+  const delta = arr - dep;
+
+  buildCrossMatrix(dep, arr);
+
+  const aArr = ALARME[arr];
+  const aDep = ALARME[dep];
+  const accli = getAccliTime(delta);
+
+  // Transition visual
+  const transHTML = `
+  <div class="transition-arrow">
+    <div class="t-zone" style="background:${aDep.color}18;border:1px solid ${aDep.color}44">
+      <div class="t-zone-label">D&eacute;part</div>
+      <div class="t-zone-cls" style="color:${aDep.color}">${dep}</div>
+      <div class="t-zone-name" style="color:${aDep.color}">${aDep.niveau}</div>
+    </div>
+    <div class="t-mid">${delta > 0 ? "&#8594;" : delta < 0 ? "&#8592;" : "&#8596;"}</div>
+    <div class="t-zone" style="background:${aArr.color}18;border:1px solid ${aArr.color}44">
+      <div class="t-zone-label">Arriv&eacute;e</div>
+      <div class="t-zone-cls" style="color:${aArr.color}">${arr}</div>
+      <div class="t-zone-name" style="color:${aArr.color}">${aArr.niveau}</div>
+    </div>
+  </div>`;
+
+  // Risk badge
+  const riskHTML = `
+  <div class="risk-badge" style="background:${ri.bg};border-color:${ri.border}">
+    <div class="risk-icon">${ri.icon}</div>
+    <div>
+      <div class="risk-level" style="color:${ri.color}">${ri.label}</div>
+      <div class="risk-sub" style="color:var(--muted)">
+        &Delta; = ${delta > 0 ? "+" : ""}${delta} classe${Math.abs(delta) > 1 ? "s" : ""}
+        &mdash; Niveau d&apos;arriv&eacute;e : ${aArr.niveau}
+      </div>
+    </div>
+    <div class="risk-delta" style="color:${ri.color}">${delta > 0 ? "+" : ""}${delta}</div>
+  </div>`;
+
+  // Acclimatization
+  const accliHTML = accli ? `
+  <div class="accli-bar">
+    <div class="accli-icon">&#9200;</div>
+    <div class="accli-text">
+      <strong>${accli.desc}</strong><br/>
+      <span style="font-size:11px;color:var(--muted)">NIOSH (2016) &mdash; exposition graduelle recommandee</span>
+    </div>
+    <div class="accli-time">${accli.days}</div>
+  </div>` : "";
+
+  // Cross-product recommendations
+  const steps = getCrossSteps(dep, arr, delta, ri.level);
+
+  let stepsHTML = "";
+  const phases = ["avant", "transit", "arrivee", "suivi"];
+  const phaseLabels = { avant:"Avant", transit:"Transit", arrivee:"Arrivee", suivi:"Suivi" };
+  phases.forEach(ph => {
+    const phSteps = steps.filter(s => s.phase === ph);
+    if (phSteps.length === 0) return;
+    stepsHTML += `<div class="cross-section-title">${phaseLabels[ph]}</div>
+    <ul class="cross-steps">
+      ${phSteps.map(s =>
+        `<li>
+           <div class="cross-step-phase" style="color:${ri.color}">${phaseLabels[s.phase]}</div>
+           <span>${s.text}</span>
+         </li>`
+      ).join("")}
+    </ul>`;
+  });
+
+  // Legal note if arriving in dangerous zone
+  const legalHTML = (arr >= 4 && aArr.legal) ? `
+  <div class="legal-warning">
+    <strong>Obligations legales (Zone d&apos;arriv&eacute;e Classe ${arr})</strong><br/>
+    ${aArr.legal}
+  </div>` : "";
+
+  document.getElementById("cross-output").innerHTML =
+    transHTML + riskHTML + accliHTML + stepsHTML + legalHTML;
+
+  // Update map markers to reflect departure class context
+  if (leafletMap) refreshMapMarkers();
+}
+
+function getCrossSteps(dep, arr, delta, riskLevel) {
+  const steps = [];
+  const aArr = ALARME[arr];
+  const aDep = ALARME[dep];
+
+  // ── PRE-DEPARTURE ──
+  if (delta > 0) {
+    steps.push({ phase:"avant", text: `V&eacute;rifier la m&eacute;t&eacute;o de la zone d&apos;arriv&eacute;e (Humidex cible : ${aArr.seuil}).` });
+    if (dep <= 2 && arr >= 4)
+      steps.push({ phase:"avant", text: "Corps non acclimate : programmer une exposition graduelle sur plusieurs jours avant l&apos;arriv&eacute;e en zone chaude (NIOSH 2016)." });
+    if (arr >= 5)
+      steps.push({ phase:"avant", text: "Bilan m&eacute;dical preventif recommande pour les departs depuis une zone fraiche (< Classe 2) vers une zone de danger (>= Classe 5)." });
+    steps.push({ phase:"avant", text: `Hydrater 500 mL suppl&eacute;mentaires dans les 2h avant le d&eacute;part (pr&eacute;-charge hydrique &mdash; OHCOW 2022).` });
+    if (delta >= 2)
+      steps.push({ phase:"avant", text: "Pr&eacute;parer kit chaleur : brumisateur, linge humide, eau sal&eacute;e (electrolytes), thermom&egrave;tre auriculaire." });
+  } else if (delta < 0) {
+    steps.push({ phase:"avant", text: `Zone d&apos;arriv&eacute;e plus fraiche (${aArr.niveau}). Pr&eacute;voir v&ecirc;tements adapt&eacute;s si delta &ge; 3 classes.` });
+    if (Math.abs(delta) >= 3)
+      steps.push({ phase:"avant", text: "Risque de choc thermique froid : &eacute;viter l&apos;air conditionne agressif directement après une forte chaleur (HAS 2023)." });
+  } else {
+    steps.push({ phase:"avant", text: `M&ecirc;me niveau thermique (Classe ${arr}). Appliquer directement le protocole standard de la classe.` });
+  }
+
+  // ── TRANSIT ──
+  if (delta > 0) {
+    if (arr >= 3) {
+      steps.push({ phase:"transit", text: "250 mL d&apos;eau fraiche toutes les 20 min pendant le trajet m&ecirc;me en v&eacute;hicule climatis&eacute;." });
+      steps.push({ phase:"transit", text: "Ne pas s&apos;exposer directement au soleil &agrave; l&apos;arriv&eacute;e : entrer d&apos;abord dans un espace frais 15-20 min (sas d&apos;acclimatation)." });
+    }
+    if (delta >= 3)
+      steps.push({ phase:"transit", text: `Produit en croix Classe ${dep} \u00d7 Classe ${arr} : appliquer le protocole de classe ${Math.min(7, Math.floor((dep + arr) / 2) + 1)} d&egrave;s le transit (niveau interm&eacute;diaire).` });
+  } else if (delta < 0 && Math.abs(delta) >= 2) {
+    steps.push({ phase:"transit", text: "Refroidissement progressif : r&eacute;duire la climatisation graduellement plut&ocirc;t que passage brutal chaud&rarr;froid." });
+  }
+
+  // ── POST-ARRIVAL ──
+  steps.push({ phase:"arrivee", text: `Appliquer imm&eacute;diatement le protocole Classe ${arr} : ${aArr.conseil}` });
+  if (delta >= 2) {
+    steps.push({ phase:"arrivee", text: `Premi&egrave;re heure : r&eacute;duire l&apos;intensit&eacute; des activit&eacute;s de 50 % (corps non acclimate &mdash; NIOSH, exposition progressive).` });
+    steps.push({ phase:"arrivee", text: `Surveiller : vertiges, naus&eacute;es, peau rouge et s&egrave;che, confusion = signes de coup de chaleur &rarr; appeler le 15 imm&eacute;diatement.` });
+  }
+  if (arr >= 4) {
+    aArr.protocole.forEach(p => {
+      steps.push({ phase:"arrivee", text: p });
+    });
+  }
+
+  // ── FOLLOW-UP ──
+  if (delta >= 2) {
+    const accli = getAccliTime(delta);
+    steps.push({ phase:"suivi", text: `Acclimatation compl&egrave;te pr&eacute;vue sous ${accli.days}. Augmenter progressivement les activit&eacute;s physiques chaque jour.` });
+  }
+  if (dep >= 4 && arr <= 1) {
+    steps.push({ phase:"suivi", text: "Passage de zone chaude (&ge; Classe 4) vers zone fraiche : surveiller les crampes musculaires (perte en sel) les 24h suivantes." });
+  }
+  if (arr >= 5)
+    steps.push({ phase:"suivi", text: `Produit en croix : bilan de fin de journ&eacute;e obligatoire &mdash; peser avant/apr&egrave;s exposition (perte >1 kg = d&eacute;shydratation significative &mdash; ACGIH TLV 2023).` });
+
+  return steps;
+}
 </script>
 </body>
 </html>

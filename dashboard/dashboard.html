@@ -257,9 +257,16 @@
 
     /* Footer */
     footer {
-      border-top: 1px solid var(--border); padding: 12px 28px;
-      display: flex; gap: 20px; font-size: 11px; color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding: 12px 28px;
+      display: flex;
+      gap: 20px;
+      font-size: 11px;
+      color: var(--muted);
       flex-wrap: wrap;
+      background: var(--surface);
+      position: relative;
+      z-index: 2;
     }
     footer strong { color: var(--text); }
 
@@ -276,17 +283,73 @@
     .tab-btn:hover { color: var(--text); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* ── Carte & Deplacement page ─────────────────────────────── */
-    .carte-layout {
-      display: grid; grid-template-columns: 1fr 420px; gap: 0;
-      min-height: calc(100vh - 152px);
+    /* ── Timeline ────────────────────────────────────────────── */
+    .timeline-section {
+      padding: 18px 28px 24px; border-top: 1px solid var(--border);
+      background: var(--surface);
     }
+    .timeline-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+    }
+    .timeline-modes {
+      display: flex; gap: 6px;
+    }
+    .tl-btn {
+      padding: 4px 14px; border-radius: 14px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); cursor: pointer;
+      font-size: 11px; font-weight: 600; transition: all .2s;
+    }
+    .tl-btn.active { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+    .tl-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    #timeline-chart { width: 100% !important; height: 180px !important; }
+
+    /* ── Carte & Deplacement page ─────────────────────────────── */
+    #page-carte { width: 100%; }
+    .carte-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) 420px;
+      gap: 18px;
+      padding: 18px 22px 22px;
+      align-items: stretch;
+      
+    }
+
     .map-section {
-      padding: 18px 22px; border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+      min-height: 470px;
+      max-height: 760px;
+      overflow: hidden;
+    }
+
+    .map-section,
+    .rec-engine {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+      height: 70vh;
+      min-height: 560px;
+      max-height: 900px;
+   }
+
+   .rec-engine-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
     }
     #map-container {
-      height: calc(100vh - 260px); min-height: 400px;
-      border-radius: 8px; overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      border-radius: 12px;
+      overflow: hidden;
       border: 1px solid var(--border);
     }
     .map-legend {
@@ -298,51 +361,117 @@
     .map-legend-dot {
       width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
     }
+    .map-date-bar { display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap; }
+    .map-date-label { font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.7px; }
+    #map-date-input { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:6px; font-size:12px; }
+    #map-date-cls-info { font-size:11px; color:var(--muted); font-style:italic; }
 
     /* ── Recommendation Engine ────────────────────────────────── */
     .rec-engine {
-      padding: 18px; overflow-y: auto;
-      max-height: calc(100vh - 152px);
-      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+      
+      max-height: 760px;
+      overflow: hidden;
     }
     .zone-selectors {
-      display: grid; grid-template-columns: 1fr 28px 1fr; gap: 10px;
-      align-items: end; margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1fr 34px 1fr;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 18px;
     }
+    
     .zone-select label {
-      display: block; font-size: 10px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px;
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin-bottom: 6px;
     }
     .zone-select select {
-      width: 100%; background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 12px;
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
       cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
     }
-    .zone-select select:focus { outline: none; border-color: var(--accent); }
+    .zone-select select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88,166,255,.14);
+    }
+
     .zone-arrow {
-      font-size: 20px; color: var(--muted); text-align: center;
-      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      border-radius: 10px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 18px;
+      font-weight: 700;
     }
 
     /* Cross-matrix mini grid */
     .cross-matrix-wrap {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      padding: 10px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 12px;
     }
+
     .cross-matrix-grid {
-      display: grid; grid-template-columns: 20px repeat(8, 1fr);
-      gap: 2px; font-size: 9px;
+      display: grid;
+      grid-template-columns: 22px repeat(8, 1fr);
+      gap: 4px;
+      font-size: 9px;
     }
+
     .cm-cell {
-      aspect-ratio: 1; border-radius: 3px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 9px; color: #0d111788;
-      transition: transform .1s; border: 1px solid transparent;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 10px;
+      color: rgba(13,17,23,.65);
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      border: 1px solid transparent;
     }
-    .cm-cell:hover { transform: scale(1.3); z-index: 5; }
-    .cm-cell.cm-active { border-color: white; transform: scale(1.3); z-index: 5; }
+
+    .cm-cell:hover {
+      border-color: rgba(255,255,255,.85);
+      box-shadow: 0 4px 12px rgba(0,0,0,.22);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .cm-cell.cm-active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,.08);
+    transform: translateY(-1px);
+    }
+
     .cm-label {
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; color: var(--muted); font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
     }
     .cm-axis-label {
       grid-column: 1 / -1; font-size: 9px; color: var(--muted);
@@ -350,55 +479,268 @@
     }
 
     /* Risk badge */
-    .risk-badge {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 14px; border-radius: 8px; margin-bottom: 12px;
-      border: 1px solid; transition: all .3s;
+    .transition-arrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: #0d1117;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
-    .risk-icon { font-size: 28px; line-height: 1; }
-    .risk-level { font-size: 15px; font-weight: 700; }
-    .risk-sub { font-size: 11px; margin-top: 2px; }
-    .risk-delta { margin-left: auto; font-size: 28px; font-weight: 900; }
+
+    .t-zone {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .t-zone-label {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 4px;
+    }
+
+    .t-zone-cls {
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .t-zone-name {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .t-mid {
+      font-size: 24px;
+      color: var(--accent);
+      font-weight: 800;
+    }
 
     /* Accli timeline */
     .accli-bar {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
     }
-    .accli-icon { font-size: 18px; }
-    .accli-text { font-size: 12px; }
-    .accli-time { font-size: 18px; font-weight: 700; color: var(--accent); margin-left: auto; }
 
+    .accli-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(88,166,255,.12);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .accli-text {
+      font-size: 12px;
+    }
+
+    .accli-time {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-left: auto;
+    }
     /* Steps list for cross rec */
-    .cross-steps { list-style: none; margin-bottom: 10px; }
+    .cross-steps {
+      list-style: none;
+      margin-bottom: 12px;
+    }
     .cross-steps li {
-      display: flex; gap: 10px; padding: 7px 0;
-      border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.4;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.45;
     }
     .cross-steps li:last-child { border-bottom: none; }
     .cross-step-phase {
-      font-size: 9px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .5px; margin-top: 1px;
-      flex-shrink: 0; width: 50px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .9px;
+      line-height: 1.2;
+      padding-top: 2px;
     }
     .cross-section-title {
       font-size: 10px; font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: .7px;
       margin: 10px 0 6px; padding-bottom: 5px; border-bottom: 1px solid var(--border);
     }
-    .transition-arrow {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
-      padding: 10px 14px; background: var(--bg); border-radius: 8px;
-      border: 1px solid var(--border);
+    .cross-step-text {
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.45;
+  }
+
+      
+
+    .bs-marker-stem {
+      width: 2px;
+      height: 10px;
+      background: rgba(255,255,255,.45);
+      border-radius: 999px;
+      margin-top: 1px;
     }
-    .t-zone {
-      flex: 1; text-align: center; padding: 8px; border-radius: 6px;
+
+    .bs-marker-name {
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(13,17,23,.82);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #e6edf3;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,.28);
     }
-    .t-zone-label { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
-    .t-zone-cls { font-size: 26px; font-weight: 900; line-height: 1; }
-    .t-zone-name { font-size: 10px; margin-top: 2px; }
-    .t-mid { font-size: 24px; color: var(--muted); }
+
+    .leaflet-tooltip.bs-tip {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      color: #e6edf3;
+      box-shadow: 0 10px 30px rgba(0,0,0,.55);
+      padding: 0;
+    }
+
+    .leaflet-tooltip.bs-tip::before {
+      display: none;
+    }
+
+    .bs-tip-inner {
+      min-width: 230px;
+      padding: 12px 14px;
+    }
+
+    .bs-tip-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bs-tip-cls {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 16px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .bs-tip-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e6edf3;
+    }
+
+    .bs-tip-sub {
+      font-size: 10px;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+
+    .bs-tip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 5px 0;
+      border-bottom: 1px solid #21262d;
+      font-size: 12px;
+    }
+
+    .bs-tip-row:last-child {
+      border-bottom: none;
+    }
+
+    .bs-tip-key {
+      color: #8b949e;
+    }
+
+    .bs-tip-val {
+      color: #e6edf3;
+      font-weight: 700;
+    }
+
+    .bs-tip-note {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .risk-badge {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      border: 1px solid;
+    }
+
+    .risk-icon {
+      font-size: 24px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .risk-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .risk-level {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .risk-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .risk-delta {
+      flex-shrink: 0;
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1;
+      align-self: center;
+    }
+ 
   </style>
 </head>
 <body>
@@ -476,6 +818,19 @@
 <!-- Tooltip -->
 <div class="tooltip" id="tooltip"></div>
 
+<!-- ── Timeline ─────────────────────────────────────────────────────────────── -->
+<div class="timeline-section">
+  <div class="timeline-header">
+    <div class="panel-title" style="margin-bottom:0">&#201;volution temporelle &mdash; Donn&#233;es journali&#232;res</div>
+    <div class="timeline-modes">
+      <button class="tl-btn active" id="tl-cls" onclick="setTimelineMode('cls')">Classe</button>
+      <button class="tl-btn" id="tl-hx" onclick="setTimelineMode('hx')">Humidex</button>
+      <button class="tl-btn" id="tl-T" onclick="setTimelineMode('T')">Temp&#233;rature</button>
+    </div>
+  </div>
+  <canvas id="timeline-chart"></canvas>
+</div>
+
 </div><!-- end page-analyse -->
 
 <!-- ── Page Carte & Deplacement ─────────────────────────────────────────────── -->
@@ -487,21 +842,28 @@
       <div class="panel-title">Carte thermique &mdash; Stations M&eacute;t&eacute;o France</div>
       <div id="map-container"></div>
       <div class="map-legend" id="map-legend"></div>
+      <div class="map-date-bar">
+        <span class="map-date-label">Date :</span>
+        <input type="date" id="map-date-input" />
+        <span id="map-date-cls-info"></span>
+      </div>
     </div>
 
     <!-- Recommendation Engine -->
     <div class="rec-engine">
-      <div class="panel-title">Moteur de recommandation &mdash; D&eacute;placement thermique</div>
+     <div class="rec-engine-scroll">
+
+       <div class="panel-title">Moteur de recommandation &mdash; D&eacute;placement thermique</div>
 
       <div class="zone-selectors">
         <div class="zone-select">
           <label>Zone de d&eacute;part</label>
-          <select id="dep-class" onchange="computeCross()"></select>
+          <select id="dep-station" onchange="computeCross()"></select>
         </div>
         <div class="zone-arrow">&#8594;</div>
         <div class="zone-select">
           <label>Zone d&apos;arriv&eacute;e</label>
-          <select id="arr-class" onchange="computeCross()"></select>
+          <select id="arr-station" onchange="computeCross()"></select>
         </div>
       </div>
 
@@ -521,6 +883,7 @@
           S&eacute;lectionnez une zone de d&eacute;part et d&apos;arriv&eacute;e
         </div>
       </div>
+     </div>
     </div>
 
   </div>
@@ -636,6 +999,28 @@ let selectedDate  = null;
 let timelineChart = null;
 let donutChart    = null;
 let activeRow     = null;
+let histChart     = null;
+let histMode      = "cls";
+let leafletMap    = null;
+let mapMarkerLayers = [];
+let mapInitialized  = false;
+let stationsLayer = null;
+
+// Map state
+let mapDate = null; // selected date for map
+
+function getStationsForDate(date) {
+  const list = DATA.stations_list || [];
+  const daily = DATA.stations_daily || {};
+  const dayData = daily[date] || [];
+  return list.map((st, idx) => {
+    const d = dayData[idx];
+    const cls  = (d && d[0] >= 0) ? d[0] : 0;
+    const hx   = (d && d[0] >= 0) ? d[1] : null;
+    const maxT = (d && d[0] >= 0) ? d[2] : null;
+    return { ...st, cls, hx, maxT };
+  });
+}
 
 // ── Load ──────────────────────────────────────────────────────────────────────
 (function () {
@@ -673,6 +1058,7 @@ function initUI() {
   calYear = parseInt(startDate.slice(0, 4));
   buildCalendar();
   showDay(startDate);
+  buildTimeline();
 }
 
 // ── Legend ────────────────────────────────────────────────────────────────────
@@ -775,6 +1161,7 @@ function setSource(src) {
     buildCalendar();
     showDay(newDate);
   }
+  buildTimeline();
 }
 
 // ── Day navigation ────────────────────────────────────────────────────────────
@@ -1077,6 +1464,129 @@ function buildDonutChart(s) {
   });
 }
 
+// ── Timeline chart ────────────────────────────────────────────────────────────
+window.setTimelineMode = setTimelineMode;
+
+function setTimelineMode(mode) {
+  histMode = mode;
+  ["cls", "hx", "T"].forEach(m => {
+    const btn = document.getElementById("tl-" + m);
+    if (btn) btn.classList.toggle("active", m === mode);
+  });
+  buildTimeline();
+}
+
+function buildTimeline() {
+  const cal = source === "meteo" ? DATA.calendar_meteo : DATA.calendar_neusta;
+  if (!cal || cal.length === 0) return;
+
+  const sorted = [...cal].sort((a, b) => a.date.localeCompare(b.date));
+  const labels = sorted.map(d => d.date);
+
+  let values, label, unit;
+  if (histMode === "cls") {
+    values = sorted.map(d => d.max_cls);
+    label  = "Classe thermique max";
+    unit   = "";
+  } else if (histMode === "hx") {
+    values = sorted.map(d => d.max_hx);
+    label  = "Humidex max";
+    unit   = " HX";
+  } else {
+    values = sorted.map(d => {
+      const day = (source === "meteo" ? DATA.meteo_days : DATA.neusta_days)[d.date];
+      return day ? day.stats.max_T : null;
+    });
+    label  = "Temp\u00e9rature max (\u00b0C)";
+    unit   = " \u00b0C";
+  }
+
+  const bgColors = sorted.map(d => {
+    const cls = d.max_cls;
+    return ALARME[cls] ? ALARME[cls].color + "cc" : "#8b949e88";
+  });
+
+  const ctx = document.getElementById("timeline-chart");
+  if (!ctx) return;
+
+  if (histChart) { histChart.destroy(); histChart = null; }
+
+  histChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data: values,
+        backgroundColor: bgColors,
+        borderWidth: 0,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => {
+              const d = items[0].label;
+              return new Date(d).toLocaleDateString("fr-FR", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
+            },
+            label: (item) => {
+              const d = sorted[item.dataIndex];
+              const cls = d.max_cls;
+              const niveau = ALARME[cls] ? ALARME[cls].niveau : "";
+              return [
+                " " + label + " : " + (item.raw !== null ? item.raw + unit : "\u2014"),
+                " Classe " + cls + " \u2014 " + niveau,
+                " HX max : " + d.max_hx + " HX"
+              ];
+            }
+          },
+          backgroundColor: "#0d1117",
+          borderColor: "#30363d",
+          borderWidth: 1,
+          titleColor: "#e6edf3",
+          bodyColor: "#8b949e",
+          padding: 10
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#8b949e",
+            font: { size: 9 },
+            maxTicksLimit: 24,
+            maxRotation: 0,
+            callback: (val, idx) => {
+              const date = labels[idx];
+              if (!date) return "";
+              const d = new Date(date);
+              return d.getDate() === 1 ? d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }) : "";
+            }
+          },
+          grid: { color: "#21262d" }
+        },
+        y: {
+          grid: { color: "#21262d" },
+          ticks: { color: "#8b949e", font: { size: 10 } },
+          min: histMode === "cls" ? 0 : undefined,
+          max: histMode === "cls" ? 7 : undefined,
+        }
+      },
+      onClick: (_e, elements) => {
+        if (elements.length > 0) {
+          const date = labels[elements[0].index];
+          if (date) { calYear = parseInt(date.slice(0,4)); buildCalendar(); showDay(date); }
+        }
+      }
+    }
+  });
+}
+
 // ── Render Recommendations ────────────────────────────────────────────────────
 function renderRec(cls) {
   const a   = ALARME[cls];
@@ -1164,57 +1674,27 @@ window.switchTab   = switchTab;
 window.computeCross = computeCross;
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
-let mapInitialized = false;
-
 function switchTab(tab) {
   document.getElementById("page-analyse").style.display = tab === "analyse" ? "" : "none";
   document.getElementById("page-carte").style.display   = tab === "carte"   ? "" : "none";
   document.getElementById("tab-analyse").classList.toggle("active", tab === "analyse");
   document.getElementById("tab-carte").classList.toggle("active",   tab === "carte");
   if (tab === "carte" && !mapInitialized) {
-    initMap();
-    initCrossEngine();
     mapInitialized = true;
+    if (!mapDate) mapDate = selectedDate;
+    setTimeout(() => {
+      initMap();
+      initCrossEngine();
+    }, 50);
+  } else if (tab === "carte" && leafletMap) {
+    if (!mapDate) mapDate = selectedDate;
+    leafletMap.invalidateSize();
   }
 }
 
 // ── Leaflet Map ───────────────────────────────────────────────────────────────
-// Stations Meteo France avec coordonnees et donnees representatives
-const STATIONS = [
-  { id: "toulouse",  name: "Toulouse-Blagnac",  lat: 43.6219, lon: 1.3842,  dept: "31", region: "Occitanie" },
-  { id: "paris",     name: "Paris-CDG",          lat: 49.0097, lon: 2.5479,  dept: "95", region: "Ile-de-France" },
-  { id: "marseille", name: "Marseille-Marignane",lat: 43.4393, lon: 5.2214,  dept: "13", region: "PACA" },
-  { id: "lyon",      name: "Lyon-Bron",           lat: 45.7271, lon: 4.9422,  dept: "69", region: "Auvergne-Rhone-Alpes" },
-  { id: "bordeaux",  name: "Bordeaux-Merignac",   lat: 44.8283, lon: -0.7153, dept: "33", region: "Nouvelle-Aquitaine" },
-  { id: "nantes",    name: "Nantes-Atlantique",   lat: 47.1568, lon: -1.6062, dept: "44", region: "Pays de la Loire" },
-  { id: "strasbourg",name: "Strasbourg-Entzheim", lat: 48.5448, lon: 7.6283,  dept: "67", region: "Grand Est" },
-  { id: "lille",     name: "Lille-Lesquin",        lat: 50.5633, lon: 3.0897,  dept: "59", region: "Hauts-de-France" },
-  { id: "nice",      name: "Nice-Cote d'Azur",     lat: 43.6584, lon: 7.2089,  dept: "06", region: "PACA" },
-  { id: "montpellier",name:"Montpellier-Frejorgues",lat:43.5828,lon: 3.9630,  dept: "34", region: "Occitanie" },
-];
 
-// Classes representatifs par station (estimations basees sur climat)
-// Toulouse = donnees reelles, autres = estimations climatiques relatives
-function getStationClass(stationId, refCls) {
-  const offsets = {
-    toulouse:   0,
-    marseille:  +1,
-    nice:       +1,
-    montpellier:+1,
-    bordeaux:   0,
-    lyon:       -1,
-    paris:      -1,
-    strasbourg: -2,
-    nantes:     -1,
-    lille:      -2,
-  };
-  return Math.max(0, Math.min(7, refCls + (offsets[stationId] || 0)));
-}
-
-let leafletMap = null;
-let mapMarkerLayers = [];
-
-// Inject map marker CSS once
+// Inject map marker + tooltip CSS
 (function injectMapCSS() {
   const style = document.createElement("style");
   style.textContent = `
@@ -1227,7 +1707,7 @@ let mapMarkerLayers = [];
       width: 46px; height: 46px; border-radius: 50%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       border: 3px solid rgba(255,255,255,0.9);
-      box-shadow: 0 4px 16px rgba(0,0,0,.45), 0 0 0 0 currentColor;
+      box-shadow: 0 4px 16px rgba(0,0,0,.45);
       position: relative; color: #0d1117;
     }
     .bs-pin.danger { animation: map-pulse 1.6s ease-in-out infinite; }
@@ -1237,17 +1717,12 @@ let mapMarkerLayers = [];
     }
     .bs-pin-cls  { font-size: 20px; font-weight: 900; line-height: 1; color: #fff; }
     .bs-pin-icon { font-size: 9px; color: rgba(255,255,255,0.85); margin-top: 1px; }
-    .bs-stem {
-      width: 2px; height: 8px;
-      background: rgba(255,255,255,0.6);
-      border-radius: 0 0 2px 2px;
-    }
+    .bs-stem { width: 2px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 0 0 2px 2px; }
     .bs-label {
       font-size: 10px; font-weight: 700; color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.7);
       white-space: nowrap; margin-top: 3px; letter-spacing: .2px;
     }
-    /* Leaflet tooltip override */
     .leaflet-tooltip.bs-tip {
       background: #0d1117; border: 1px solid #30363d;
       border-radius: 10px; padding: 0; box-shadow: 0 8px 32px rgba(0,0,0,.7);
@@ -1282,60 +1757,20 @@ let mapMarkerLayers = [];
   document.head.appendChild(style);
 })();
 
-// Estimated T/HR/HX by class (midpoint)
-const CLS_TYPICAL = {
-  0: { T: 18, HR: 60, HX: 16 },
-  1: { T: 24, HR: 58, HX: 27 },
-  2: { T: 29, HR: 63, HX: 32 },
-  3: { T: 34, HR: 68, HX: 36 },
-  4: { T: 38, HR: 72, HX: 39 },
-  5: { T: 41, HR: 76, HX: 42 },
-  6: { T: 44, HR: 80, HX: 44 },
-  7: { T: 47, HR: 85, HX: 48 },
-};
-// Regional T offset (relative to Toulouse)
-const REGIONAL_T_OFFSET = {
-  toulouse: 0, marseille: +2, nice: +2, montpellier: +1,
-  bordeaux: -1, lyon: -2, paris: -3, strasbourg: -4, nantes: -2, lille: -4,
-};
-
-function getStationData(st, refCls) {
-  const cls  = getStationClass(st.id, refCls);
-  const days = DATA ? DATA.meteo_days : null;
-  const isRef = st.id === "toulouse";
-
-  let T, HR, HX;
-  if (isRef && days && selectedDate && days[selectedDate]) {
-    const s = days[selectedDate].stats;
-    T = s.max_T; HR = s.avg_HR; HX = s.max_hx;
-  } else {
-    const typ = CLS_TYPICAL[cls];
-    const dt  = REGIONAL_T_OFFSET[st.id] || 0;
-    T  = Math.round((typ.T + dt) * 10) / 10;
-    HR = typ.HR;
-    HX = Math.round((typ.HX + dt * 0.7) * 10) / 10;
-  }
-  return { cls, T, HR, HX, isRef };
-}
-
-function makeTooltipHTML(st, d) {
-  const a = ALARME[d.cls];
+function makeTooltipHTML(st) {
+  const a = ALARME[st.cls];
   const rows = [
-    { k: "Temp\u00e9rature",  v: d.T + " \u00b0C" },
-    { k: "Humidit\u00e9",     v: d.HR + " %" },
-    { k: "Humidex",           v: d.HX + " HX" },
-    { k: "Seuil classe",      v: a.seuil },
+    { k: "Temp\u00e9rature max", v: st.maxT !== null ? st.maxT + " \u00b0C" : "\u2014" },
+    { k: "Humidex max",          v: st.hx   !== null ? st.hx   + " HX"   : "\u2014" },
+    { k: "Seuil classe",         v: a.seuil },
   ];
-  const src = d.isRef
-    ? `<span class="bs-tip-badge" style="background:#58a6ff33;color:#58a6ff">\u2605 Donn\u00e9es r\u00e9elles</span>`
-    : `<span class="bs-tip-badge" style="background:#ffffff11;color:#8b949e">Estimation climatique</span>`;
 
   return `<div class="bs-tip-inner">
     <div class="bs-tip-header">
-      <div class="bs-tip-cls" style="background:${a.color}">${d.cls}</div>
+      <div class="bs-tip-cls" style="background:${a.color}">${st.cls}</div>
       <div>
         <div class="bs-tip-name">${st.name}</div>
-        <div class="bs-tip-region">${st.region} &bull; D\u00e9p. ${st.dept}</div>
+        <div class="bs-tip-region">${a.niveau}</div>
       </div>
     </div>
     ${rows.map(r => `<div class="bs-tip-row">
@@ -1345,13 +1780,12 @@ function makeTooltipHTML(st, d) {
     <div class="bs-tip-conseil" style="background:${a.color}18;color:${a.color}">
       ${a.conseil}
     </div>
-    ${src}
   </div>`;
 }
 
 function initMap() {
   leafletMap = L.map("map-container", { zoomControl: true }).setView([46.6, 2.4], 6);
-
+  stationsLayer = L.layerGroup().addTo(leafletMap);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> &copy; <a href='https://carto.com/'>CARTO</a>",
     subdomains: "abcd", maxZoom: 14
@@ -1359,69 +1793,131 @@ function initMap() {
 
   refreshMapMarkers();
   buildMapLegend();
+
+  // Wire up the map date input
+  const mapDateInput = document.getElementById("map-date-input");
+  if (mapDateInput) {
+    mapDateInput.value = selectedDate || "";
+    mapDateInput.onchange = (e) => {
+      mapDate = e.target.value;
+      refreshMapMarkers();
+      updateMapDateInfo();
+    };
+    updateMapDateInfo();
+  }
+}
+
+function updateMapDateInfo() {
+  const el = document.getElementById("map-date-cls-info");
+  if (!el) return;
+  const date = mapDate || selectedDate;
+  const daily = DATA.stations_daily || {};
+  const dayData = daily[date] || [];
+  const validEntries = dayData.filter(d => d && d[0] >= 0);
+  if (validEntries.length === 0) { el.textContent = ""; return; }
+  const maxCls = Math.max(...validEntries.map(d => d[0]));
+  el.textContent = validEntries.length + " stations \u00b7 classe max : " + maxCls + " \u00b7 " + (ALARME[maxCls]?.niveau || "");
+  el.style.color = ALARME[maxCls]?.color || "var(--muted)";
+}
+
+function lightenColor(hex, factor = 1.2) {
+  const r = Math.min(255, parseInt(hex.slice(1,3),16) * factor);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16) * factor);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16) * factor);
+
+  return `rgb(${r},${g},${b})`;
 }
 
 function refreshMapMarkers() {
   if (!leafletMap) return;
 
-  const days = DATA ? DATA.meteo_days : null;
-  let refCls = 1;
-  if (days && selectedDate && days[selectedDate])
-    refCls = days[selectedDate].stats.max_cls;
-  else if (days) {
-    const dates = Object.keys(days).sort();
-    const latest = dates[dates.length - 1];
-    if (latest && days[latest]) refCls = days[latest].stats.max_cls;
-  }
+  const date = mapDate || selectedDate;
+  const stations = getStationsForDate(date);
 
-  // Remove old markers
-  mapMarkerLayers.forEach(l => leafletMap.removeLayer(l));
+  mapMarkerLayers.forEach(layer => leafletMap.removeLayer(layer));
   mapMarkerLayers = [];
+  stationsLayer.clearLayers();
+  const bounds = L.latLngBounds([]);
 
-  STATIONS.forEach(st => {
-    const d = getStationData(st, refCls);
-    const a = ALARME[d.cls];
-    const isRef = d.isRef;
+  stations.forEach(st => {
+    const alarm = ALARME[st.cls] || ALARME[0];
+    const radius =
+      st.cls >= 6 ? 16 :
+      st.cls >= 4 ? 13 :
+      st.cls >= 2 ? 10 : 8;
 
-    const pinClass = d.cls >= 4 ? " danger" : "";
-    const pinSize  = isRef ? 52 : 44;
-
-    const icon = L.divIcon({
-      className: "",
-      iconAnchor: [pinSize / 2, pinSize + 18],
-      iconSize:   [pinSize, pinSize + 26],
-      html: `
-        <div class="bs-marker" style="width:${pinSize}px">
-          <div class="bs-pin${pinClass}" style="
-            width:${pinSize}px; height:${pinSize}px;
-            background:${a.color};
-            ${isRef ? "border-width:3px;border-color:#fff;" : "border-width:2px;border-color:rgba(255,255,255,0.7);"}
-            box-shadow:0 4px 16px rgba(0,0,0,.5),0 0 18px ${a.color}55;
-          ">
-            <div class="bs-pin-cls">${d.cls}</div>
-            <div class="bs-pin-icon">${isRef ? "\u2605" : "\u25cf"}</div>
-          </div>
-          <div class="bs-stem"></div>
-          <div class="bs-label">${st.name.split("-")[0]}</div>
-        </div>`
+    const marker = L.circleMarker([st.lat, st.lon], {
+      radius,
+      color: lightenColor(alarm.color, 1.25),
+      stroke: true, 
+      weight: 1.5,
+      fillColor: alarm.color,
+      fillOpacity: 0.9,
     });
 
-    const marker = L.marker([st.lat, st.lon], { icon, zIndexOffset: isRef ? 1000 : 0 });
+   
 
-    marker.bindTooltip(makeTooltipHTML(st, d), {
+    marker.bindTooltip(`
+      <div class="bs-tip-inner">
+        <div class="bs-tip-head">
+          <div class="bs-tip-cls" style="background:${alarm.color}">${st.cls}</div>
+          <div>
+            <div class="bs-tip-title">${st.name}</div>
+            <div class="bs-tip-sub">${alarm.niveau}</div>
+          </div>
+        </div>
+
+        <div class="bs-tip-row">
+          <span class="bs-tip-key">Humidex max</span>
+          <span class="bs-tip-val">${st.hx ?? "—"} HX</span>
+        </div>
+        <div class="bs-tip-row">
+          <span class="bs-tip-key">Température max</span>
+          <span class="bs-tip-val">${st.maxT ?? "—"} °C</span>
+        </div>
+        <div class="bs-tip-row">
+          <span class="bs-tip-key">Seuil</span>
+          <span class="bs-tip-val">${alarm.seuil}</span>
+        </div>
+
+        <div class="bs-tip-note" style="background:${alarm.color}18; color:${alarm.color}">
+          ${alarm.conseil}
+        </div>
+      </div>
+    `, {
       className: "bs-tip",
       direction: "top",
-      offset: [0, -(pinSize + 20)],
-      opacity: 1,
-      permanent: false,
-      sticky: false
+      offset: [0, -8],
+      opacity: 1
     });
 
-    marker.addTo(leafletMap);
-    mapMarkerLayers.push(marker);
-  });
-}
+    marker.on("click", () => marker.openTooltip());
 
+  
+    marker.on("mouseover", function () {
+      this.setStyle({
+        fillOpacity: 1,
+        radius: radius + 3
+      });
+    });
+
+    marker.on("mouseout", function () {
+      this.setStyle({
+        fillOpacity: 0.85,
+        radius: radius
+      });
+    });
+
+    // marker.addTo(leafletMap);
+    marker.addTo(stationsLayer);
+    mapMarkerLayers.push(marker);
+    bounds.extend([st.lat, st.lon]);
+  });
+
+  if (bounds.isValid()) {
+    leafletMap.fitBounds(bounds.pad(0.08));
+  }
+}
 function buildMapLegend() {
   const el = document.getElementById("map-legend");
   el.innerHTML = Object.entries(ALARME).map(([cls, a]) =>
@@ -1435,16 +1931,28 @@ function buildMapLegend() {
 
 // ── Cross-product Recommendation Engine ──────────────────────────────────────
 function initCrossEngine() {
-  const sel = (id) => document.getElementById(id);
-  [sel("dep-class"), sel("arr-class")].forEach(s => {
-    s.innerHTML = Object.entries(ALARME).map(([cls, a]) =>
-      `<option value="${cls}" style="color:${a.color}">
-         Classe ${cls} — ${a.niveau} (${a.seuil})
-       </option>`
+  const stations = DATA.stations_list || [];
+  ["dep-station", "arr-station"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = stations.map((st, idx) =>
+      `<option value="${idx}">${st.name}</option>`
     ).join("");
   });
-  sel("arr-class").value = "2";
-  buildCrossMatrix(0, 2);
+  // Default: Toulouse as dep, Paris as arr
+  const toulouseIdx = stations.findIndex(s => s.name.includes("TOULOUSE"));
+  const parisIdx    = stations.findIndex(s => s.name.includes("PARIS") || s.name.includes("CDG") || s.name.includes("LE BOURGET"));
+  const depSel = document.getElementById("dep-station");
+  const arrSel = document.getElementById("arr-station");
+  if (depSel && toulouseIdx >= 0) depSel.value = toulouseIdx;
+  if (arrSel && parisIdx    >= 0) arrSel.value = parisIdx;
+  const depIdx = toulouseIdx >= 0 ? toulouseIdx : 0;
+  const arrIdx = parisIdx    >= 0 ? parisIdx    : 1;
+  const date   = mapDate || selectedDate;
+  const daily  = DATA.stations_daily?.[date] || [];
+  const depCls = (daily[depIdx]?.[0] >= 0) ? daily[depIdx][0] : 0;
+  const arrCls = (daily[arrIdx]?.[0] >= 0) ? daily[arrIdx][0] : 0;
+  buildCrossMatrix(depIdx, arrIdx, depCls, arrCls);
   computeCross();
 }
 
@@ -1486,7 +1994,7 @@ function getAccliTime(delta) {
   return { days: "14-21 jours", desc: "Acclimatation longue \u2014 exposition graduelle obligatoire" };
 }
 
-function buildCrossMatrix(selDep, selArr) {
+function buildCrossMatrix(depIdx, arrIdx, depCls, arrCls) {
   const wrap = document.getElementById("cross-matrix");
   let html = '<div class="cross-matrix-grid">';
   // Header row: col labels
@@ -1499,7 +2007,7 @@ function buildCrossMatrix(selDep, selArr) {
     html += `<div class="cm-label" style="color:${ALARME[d].color}">${d}</div>`;
     for (let a = 0; a < 8; a++) {
       const ri  = getRiskInfo(d, a);
-      const sel = (d === selDep && a === selArr) ? " cm-active" : "";
+      const sel = (d === depCls && a === arrCls) ? " cm-active" : "";
       html += `<div class="cm-cell${sel}"
                     style="background:${ri.color}${a < d ? "44" : "cc"}"
                     onclick="setCrossFromMatrix(${d},${a})"
@@ -1511,15 +2019,37 @@ function buildCrossMatrix(selDep, selArr) {
 }
 
 function setCrossFromMatrix(dep, arr) {
-  document.getElementById("dep-class").value = dep;
-  document.getElementById("arr-class").value = arr;
-  computeCross();
+  // When clicking matrix cells directly, we can't change station idx,
+  // but we can re-render the output with the chosen class pair
+  const depSel = document.getElementById("dep-station");
+  const arrSel = document.getElementById("arr-station");
+  const depIdx = depSel ? parseInt(depSel.value) : 0;
+  const arrIdx = arrSel ? parseInt(arrSel.value) : 0;
+  buildCrossMatrix(depIdx, arrIdx, dep, arr);
+  // Render output using these explicit classes
+  renderCrossOutput(dep, arr);
 }
 window.setCrossFromMatrix = setCrossFromMatrix;
 
 function computeCross() {
-  const dep = parseInt(document.getElementById("dep-class").value);
-  const arr = parseInt(document.getElementById("arr-class").value);
+  const depSel = document.getElementById("dep-station");
+  const arrSel = document.getElementById("arr-station");
+  if (!depSel || !arrSel) return;
+  const depIdx = parseInt(depSel.value);
+  const arrIdx = parseInt(arrSel.value);
+  const date   = mapDate || selectedDate;
+  const daily  = DATA.stations_daily?.[date] || [];
+  const dep    = (daily[depIdx]?.[0] >= 0) ? daily[depIdx][0] : 0;
+  const arr    = (daily[arrIdx]?.[0] >= 0) ? daily[arrIdx][0] : 0;
+
+  buildCrossMatrix(depIdx, arrIdx, dep, arr);
+  renderCrossOutput(dep, arr);
+
+  // Update map markers to reflect departure class context
+  if (leafletMap) refreshMapMarkers();
+}
+
+function renderCrossOutput(dep, arr) {
   const ri  = getRiskInfo(dep, arr);
   const delta = arr - dep;
 
@@ -1546,17 +2076,18 @@ function computeCross() {
   </div>`;
 
   // Risk badge
-  const riskHTML = `
+const riskHTML = `
   <div class="risk-badge" style="background:${ri.bg};border-color:${ri.border}">
     <div class="risk-icon">${ri.icon}</div>
-    <div>
+    <div class="risk-content">
       <div class="risk-level" style="color:${ri.color}">${ri.label}</div>
-      <div class="risk-sub" style="color:var(--muted)">
-        &Delta; = ${delta > 0 ? "+" : ""}${delta} classe${Math.abs(delta) > 1 ? "s" : ""}
-        &mdash; Niveau d&apos;arriv&eacute;e : ${aArr.niveau}
+      <div class="risk-sub">
+        Δ = ${delta > 0 ? "+" : ""}${delta} classes — Niveau d'arrivée : ${aArr.niveau}
       </div>
     </div>
-    <div class="risk-delta" style="color:${ri.color}">${delta > 0 ? "+" : ""}${delta}</div>
+    <div class="risk-delta" style="color:${ri.color}">
+      ${delta > 0 ? "+" : ""}${delta}
+    </div>
   </div>`;
 
   // Acclimatization
@@ -1579,13 +2110,13 @@ function computeCross() {
   phases.forEach(ph => {
     const phSteps = steps.filter(s => s.phase === ph);
     if (phSteps.length === 0) return;
-    stepsHTML += `<div class="cross-section-title">${phaseLabels[ph]}</div>
+   stepsHTML += `<div class="cross-section-title">${phaseLabels[ph]}</div>
     <ul class="cross-steps">
       ${phSteps.map(s =>
         `<li>
-           <div class="cross-step-phase" style="color:${ri.color}">${phaseLabels[s.phase]}</div>
-           <span>${s.text}</span>
-         </li>`
+          <div class="cross-step-phase" style="color:${ri.color}">${phaseLabels[s.phase]}</div>
+          <div class="cross-step-text">${s.text}</div>
+        </li>`
       ).join("")}
     </ul>`;
   });
@@ -1599,9 +2130,6 @@ function computeCross() {
 
   document.getElementById("cross-output").innerHTML =
     transHTML + riskHTML + accliHTML + stepsHTML + legalHTML;
-
-  // Update map markers to reflect departure class context
-  if (leafletMap) refreshMapMarkers();
 }
 
 function getCrossSteps(dep, arr, delta, riskLevel) {
